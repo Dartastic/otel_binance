@@ -2,7 +2,6 @@
 // Copyright 2025-2026 Mindful Software LLC d/b/a Dartastic.io, All rights reserved.
 
 import 'package:dartastic_opentelemetry/dartastic_opentelemetry.dart';
-import 'package:dartastic_opentelemetry_api/dartastic_opentelemetry_api.dart';
 
 import 'otel_binance_suppression.dart';
 
@@ -54,51 +53,65 @@ Future<T> tracedBinance<T>({
   final t = tracer ?? OTel.tracerProvider().getTracer('otel_binance');
   final span = t.startSpan('binance $operation', kind: SpanKind.client);
   try {
-    span.setStringAttribute('rpc.system', 'binance');
+    span.addAttributes(
+        OTel.attributes([OTel.attributeString('rpc.system', 'binance')]));
     final r = await invoke();
     final res = r.result;
     if (res != null) {
       if (res.symbol != null) {
-        span.setStringAttribute('binance.symbol', res.symbol!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('binance.symbol', res.symbol!)]));
       }
       if (res.side != null) {
-        span.setStringAttribute('binance.side', res.side!);
+        span.addAttributes(
+            OTel.attributes([OTel.attributeString('binance.side', res.side!)]));
       }
       if (res.orderType != null) {
-        span.setStringAttribute('binance.order.type', res.orderType!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('binance.order.type', res.orderType!)]));
       }
       if (res.orderId != null) {
-        span.setStringAttribute('binance.order.id', res.orderId!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('binance.order.id', res.orderId!)]));
       }
       if (res.clientOrderId != null) {
-        span.setStringAttribute('binance.client_order.id', res.clientOrderId!);
+        span.addAttributes(OTel.attributes([
+          OTel.attributeString('binance.client_order.id', res.clientOrderId!)
+        ]));
       }
       if (res.quantity != null) {
-        span.setDoubleAttribute('binance.quantity', res.quantity!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeDouble('binance.quantity', res.quantity!)]));
       }
       if (res.price != null) {
-        span.setDoubleAttribute('binance.price', res.price!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeDouble('binance.price', res.price!)]));
       }
       if (res.commission != null) {
-        span.setDoubleAttribute('binance.commission', res.commission!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeDouble('binance.commission', res.commission!)]));
       }
       if (res.status != null) {
-        span.setStringAttribute('binance.status', res.status!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('binance.status', res.status!)]));
       }
       if (res.statusCode != null) {
-        span.setIntAttribute('http.response.status_code', res.statusCode!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeInt('http.response.status_code', res.statusCode!)]));
       }
       if (res.errorCode != null) {
-        span.setStringAttribute('binance.error.code', res.errorCode!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('binance.error.code', res.errorCode!)]));
       }
-      final fail =
-          res.errorCode != null ||
+      final fail = res.errorCode != null ||
           (res.statusCode != null && res.statusCode! >= 400);
       if (fail) {
-        span.setStringAttribute(
-          ErrorResource.errorType.key,
-          res.errorCode ?? 'binance.error',
-        );
+        span.addAttributes(OTel.attributes([
+          OTel.attributeString(
+            ErrorResource.errorType.key,
+            res.errorCode ?? 'binance.error',
+          )
+        ]));
         span.setStatus(SpanStatusCode.Error, res.errorMessage);
       }
     }
